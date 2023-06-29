@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 import pytest
 
 from django.contrib.auth import get_user_model
@@ -28,7 +28,7 @@ def test_news_count(client):
 @pytest.mark.django_db
 def test_news_order(client):
     """Сортировка новостей от самой свежей к самой старой."""
-    today = datetime.today()
+    today = timezone.now()
     all_news = [
         News(
             title=f'Новость {index}',
@@ -69,7 +69,7 @@ def test_comments_order(author_client):
 @pytest.mark.django_db
 def test_anonymous_client_has_no_form(client, news):
     """Анонимному пользователю недоступна форма для отправки комментария."""
-    url = reverse('news:detail', args=(news.pk,))
+    url = reverse('news:detail', args=(news.id,))
     response = client.get(url)
     assert 'form' not in response.context
 
@@ -77,6 +77,6 @@ def test_anonymous_client_has_no_form(client, news):
 @pytest.mark.django_db
 def test_authorized_client_has_form(author_client, news):
     """Авторизованному пользователю доступна форма для отправки комментария."""
-    url = reverse('news:detail', args=(news.pk,))
+    url = reverse('news:detail', args=(news.id,))
     response = author_client.get(url)
     assert 'form' in response.context
