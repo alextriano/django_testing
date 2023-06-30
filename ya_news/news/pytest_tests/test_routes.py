@@ -45,18 +45,21 @@ def test_pages_availability_for_different_users(
     assert response.status_code == expected_status
 
 
-@pytest.mark.parametrize(
-    'name, args',
-    (
-        ('news:delete', pytest.lazy_fixture('id_for_args')),
-        ('news:edit', pytest.lazy_fixture('id_for_args')),
-    ),
-)
 @pytest.mark.django_db
-def test_redirects(client, name, args):
-    """Редирект для анонимных пользователей."""
+def test_redirect_for_delete_comments(client, comment):
+    """Редирект удаления комментария для анонимных пользователей."""
     login_url = reverse('users:login')
-    url = reverse(name, args=args)
+    url = reverse('news:delete', args=(comment.id,))
+    expected_url = f'{login_url}?next={url}'
+    response = client.get(url)
+    assertRedirects(response, expected_url)
+
+
+@pytest.mark.django_db
+def test_redirect_for_edit_comments(client, comment):
+    """Редирект изменения комментария для анонимных пользователей."""
+    login_url = reverse('users:login')
+    url = reverse('news:edit', args=(comment.id,))
     expected_url = f'{login_url}?next={url}'
     response = client.get(url)
     assertRedirects(response, expected_url)
